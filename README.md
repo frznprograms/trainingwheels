@@ -10,4 +10,4 @@ Therefore, I designed this package for like-minded individuals, with the hopes t
 
 Don't get me wrong, this package was **NOT** designed to replace or out-perform `scikit-learn` by any measure. Instead, my aim was to implement these algorithms myself without referring to the long and complex source codes available for `scikit-learn`, and to give people a chance to better understand how we can implement the intuition behind these algorithms, in code form. 
 
-I hope that those of you who see this package, and the accompanying tutorial videos (work in progress!) will be able to better appreciate what goes on in powerful machine learning packages, which we often take for granted as effective "black boxes". 
+I hope that those of you who see this package, and the accompanying tutorial videos (work in progress!) will be able to better appreciate what goes on in powerful machine learning packages, which we often take for granted as effective adn convenient "black boxes". 
