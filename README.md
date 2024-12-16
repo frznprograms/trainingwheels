@@ -1,6 +1,6 @@
-# trainingwheels
+Hi there, and welcome to
 
-Hi there, and welcome to trainingwheels!
+# trainingwheels
 
 trainingwheels was designed to be a simple, easy to follow, and intuitive package for common machine learning algorithms. 
 
