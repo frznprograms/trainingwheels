@@ -3,9 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import random
+from queue import Queue
+from collections import Counter
 
 from ..base import trainingwheels
-
 
 class RandomForestClassifier(trainingwheels):
 	def __init__(self, name="Random Forest Classifier", numeric_cols=[]):
@@ -53,7 +54,7 @@ class RandomForestClassifier(trainingwheels):
 		return score * 100 / len(predictions)
 
 
-class Node():
+class Node:
 	def __init__(self, feature = None, split_criteria = None, children = None, is_leaf = False, prediction = None):
 		self.feature = feature
 		self.split_criteria = split_criteria
@@ -94,21 +95,13 @@ class ForestTree(RandomForestClassifier):
 
 			# Randomly select a subset of features
 			selected_features = np.random.choice(n_features, size=max_features, replace=False)
-
-			# Separate numeric and categorical features in the selected subset
-			selected_numeric_cols = [col for col in selected_features if col in self.numeric_cols]
-
-			# Find the best attribute and split based on the selected features
-			best_attr, best_split = self.get_best_attr(X[:, selected_features], y, num_splits=num_splits)
+			best_attr, best_split = self.get_best_attr(X, y, num_splits=num_splits, selected_features=selected_features)
 
 			# ensure valid best_attr
 			if best_attr is None:
 				node.is_leaf = True
 				node.prediction = self.get_majority_class(y)
 				continue
-
-			# Adjust the index of `best_attr` to match the original data
-			best_attr = selected_features[best_attr]
 
 			# handle numeric features
 			if best_attr in self.numeric_cols:
@@ -242,17 +235,21 @@ class ForestTree(RandomForestClassifier):
 		entropy = -np.sum(probabilities * np.log2(probabilities))
 		return entropy
 
-	def get_best_attr(self, X_train, y_train, num_splits = 3):
+	def get_best_attr(self, X_train, y_train, num_splits = 3, selected_features=None):
 		best_attr, best_split, best_score = None, None, -np.inf
 
-		for col in range(X_train.shape[1]):
-			# handle categorical columns
+		if selected_features is None:
+			selected_features = np.arange(X_train.shape[1])
+
+		for idx, col in enumerate(selected_features): 
+			column_data = X_train[:, col]
+
 			if col not in self.numeric_cols:
-				unique_values = np.unique(X_train[:, col])
+				unique_values = np.unique(column_data)
 				information_gain = self.entropy(y_train) # start with whole dataset entropy
 
 				for value in unique_values:
-					subset_x = X_train[:, col] == value
+					subset_x = column_data == value
 					subset_y = y_train[subset_x]
 
 					# calculate weighted entropy
@@ -266,7 +263,7 @@ class ForestTree(RandomForestClassifier):
 			# handle numeric columns
 			else:
 				# sort rows first before analysing splits
-				unique_values = np.sort(np.unique(X_train[:, col]))
+				unique_values = np.sort(np.unique(column_data))
 				if len(unique_values) > 3:
 					split_points = np.linspace(unique_values[0], unique_values[-1], num = num_splits)[1: -1]
 				else:
@@ -274,8 +271,8 @@ class ForestTree(RandomForestClassifier):
 
 				for split in split_points:
 					information_gain = self.entropy(y_train)
-					lower_split = X_train[:, col] <= split
-					upper_split = X_train[:, col] > split
+					lower_split = column_data <= split
+					upper_split = column_data > split
 
 					# just in case there are empty subsets
 					if np.sum(lower_split) == 0 or np.sum(upper_split) == 0:
