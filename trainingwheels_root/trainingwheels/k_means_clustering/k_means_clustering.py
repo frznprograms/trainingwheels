@@ -17,11 +17,26 @@ class KMeansClustering(trainingwheels):
 	def euclidean_dist(a, b):
 		return np.linalg.norm(a - b, ord=2)
 
+	def __repr__(self):
+		return f"KMeansClustering(centroids={self.centroids})"
+
 
 	def fit(self, X_train, tolerance = 0.05, max_iter=1000):
-		self.centroids = []
+		'''
+		Fits appropriate clusters to data.
 
-		# Helper function
+		Args:
+			X_train: 2D numpy array of training data (categorical features must be encoded).
+			tolerance: sum of distance of cluster points from centroids at which convergence is achieved.
+			max_iter: maximum number of iterations.
+
+		Output:
+			No output. Model centroids and clusters are directly updated.
+
+		'''
+		self.centroids = [] # reset cluster centroids in event of re-call of fit()
+
+		# Helper function; determines if convergence has been achieved
 		def is_converged(tolerance, next_centroids, t, max_iter):
 			if t == 0:
 				return False # skip first iteration as next_centroids do not exist
@@ -70,6 +85,17 @@ class KMeansClustering(trainingwheels):
 
 
 	def predict_score(self, X_test):
+		'''
+		Fits appropriate clusters to data.
+
+		Args:
+			X_test: 2D numpy array of testing data (categorical features must be encoded).
+
+		Output:
+			List of results, indicating which of the centroids each point belongs to.
+			Sum of all clusters' within-cluster-sum-of-squares.
+
+		'''
 		# update centroids and clusters as well
 		results = self.predict(X_test)
 		total_wcss = 0
@@ -80,6 +106,17 @@ class KMeansClustering(trainingwheels):
 
 
 	def predict(self, X_test):
+		'''
+		Predicts cluster of points (i.e. nearest centroid).
+
+		Args:
+			X_test: 2D numpy array of testing data (categorical features must be encoded).
+
+		Output:
+			List of results, indicating which of the centroids each point belongs to.
+			(points are matched by index, i.e. if results[0] = 1, the first point belongs to cluster 1)
+
+		'''
 		if self.centroids == []:
 			raise TypeError("Model does not have any centroids initialised; Train the model first.")
 
@@ -92,10 +129,19 @@ class KMeansClustering(trainingwheels):
 
 		return results
 
+	
 	def plot_centroids(self, X_train):
 		'''
-		Plot centroids together with their clusters
-		[Only available for 2-dimensional data i.e. m = 2 in array shape (n, m)]
+		Plots centroids and their clusters.
+		** NOTE ** 
+		Model must first be trained before this method can be used for a meaningful visualisation.
+
+		Args:
+			X_train: 2D numpy array of training data (categorical features must be encoded).
+
+		Output:
+			Plot.
+
 		'''
 		num_dimensions = X_train.shape[1]
 		if num_dimensions > 2:
@@ -112,10 +158,19 @@ class KMeansClustering(trainingwheels):
 		plt.title("Model clusters and Centroids")
 		plt.show()
 
+	
 	def test_k(self, X_train, test_k_values):
 		'''
-		Iterate through different k values to find optimal k for data
-		[Default metric: Within-Cluster Sum of Squares]
+		Naive hyperparameter tuning to find the optimal number of clusters for best model performance.
+		(Assessed by within-cluster-sum-of-squares)
+
+		Args:
+			X_train: 2D numpy array of training data (categorical features must be encoded).
+			test_k_valeus: list of values to test for the number of clusters.
+
+		Output:
+			Plot.
+
 		'''
 		wcss_results = []
 
