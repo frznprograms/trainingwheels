@@ -1,3 +1,8 @@
+from itertools import product
+import pandas as pd
+import numpy as np
+
+
 class trainingwheels:
   def __init__(self):
 	self.name = "training wheels, the beginners package for machine learning"
@@ -14,20 +19,6 @@ class trainingwheels:
   def sigmoid(z):
 	return 1 / (1 + np.exp(-z))
 
-  @staticmethod
-  # sequences is a list of lists
-  def cartesian_product(*sequences):
-	indices = [0] * len(sequences) # number of parameters to tune
-	while True:
-	  yield tuple(sequences[i][indices[i]] for i in range(len(sequences)))
-	  for i in reversed(range(len(sequences))):
-		indices[i] += 1
-		if indices[i] < len(sequences[i]):
-		  break
-		indices[i] = 0
-	  else:
-		return
-
   def grid_search(self, models, model_hyperparams, X_train, y_train):
 	best_model, best_score, best_params = None, -np.inf, None
 
@@ -35,7 +26,7 @@ class trainingwheels:
 	  model_class = type(model)
 	  param_grid = model_hyperparams[model_class]
 	  # generate all possible combinations of hyperparameters
-	  param_combinations = self.cartesian_product(*param_grid.values())
+	  param_combinations = list(product(*param_grid.values()))
 
 	  for params in param_combinations:
 		param_dict = dict(zip(param_grid.keys(), params))
@@ -55,7 +46,7 @@ class trainingwheels:
 	for model in models:
 	  model_class = type(model)
 	  param_grid = model_hyperparams[model_class]
-	  param_combinations = list(self.cartesian_product(*param_grid.values()))
+	  param_combinations = list(product(*param_grid.values()))
 
 	  for params in param_combinations:
 		param_dict = dict(zip(param_grid.keys(), params))
